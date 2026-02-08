@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  pull_request:
+
+jobs:
+  build:
+    runs-on: node
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Install dependencies
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          command: |
+            apt update
+            apt install -y gcc
+            uv sync --frozen
+      - name: Run tests
+        run: uv run pytest
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ha-birthday-calendar
+          path: custom_components/ha-birthday-calendar
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: https://github.com/softprops/action-gh-release@v2
+        with:
+          files: ha-birthday-calendar.zip

@@ -1,0 +1,16 @@
+{
+    "domain": "birthday_calendar",
+    "name": "Birthday Calendar",
+    "codeowners": [
+        "@phbaer"
+    ],
+    "config_flow": true,
+    "dependencies": [],
+    "documentation": "https://git.baer.one/phbaer/ha-birthday-calendar",
+    "iot_class": "cloud_polling",
+    "issue_tracker": "https://git.baer.one/phbaer/ha-birthday-calendar/issues",
+    "requirements": [
+        "vobject==0.9.6.1"
+    ],
+    "version": "1.0.0"
+}

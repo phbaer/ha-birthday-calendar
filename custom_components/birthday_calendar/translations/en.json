@@ -1,0 +1,23 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Device is already configured"
+        },
+        "error": {
+            "cannot_connect": "Failed to connect",
+            "invalid_auth": "Invalid authentication",
+            "unknown": "Unexpected error"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "calendar_name": "Calendar Name",
+                    "url": "CardDAV URL (Addressbook)",
+                    "username": "Username",
+                    "password": "Password",
+                    "days": "Days to look ahead"
+                }
+            }
+        }
+    }
+}
