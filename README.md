@@ -23,9 +23,9 @@ A Home Assistant integration that creates a calendar entity from a CardDAV addre
 
 ### Manual Installation
 
-1.  Download the `birthday_calendar.zip` from the [Latest Release](https://git.baer.one/phbaer/ha-birthday-calendar/releases).
+1.  Download the `birthday-calendar.zip` from the [Latest Release](https://git.baer.one/phbaer/ha-birthday-calendar/releases).
 2.  Unzip it.
-3.  Copy the `custom_components/birthday_calendar` folder to your Home Assistant `config/custom_components/` directory.
+3.  Copy the `custom_components/birthday-calendar` folder to your Home Assistant `config/custom_components/` directory.
 4.  Restart Home Assistant.
 
 ## Configuration

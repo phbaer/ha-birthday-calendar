@@ -29,10 +29,12 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ha-birthday-calendar
-          path: custom_components/ha-birthday-calendar
+          name: birthday_calendar
+          path: |
+            custom_components/birthday_calendar
+            !custom_components/birthday_calendar/**/__pycache__
       - name: Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: https://github.com/softprops/action-gh-release@v2
         with:
-          files: ha-birthday-calendar.zip
+          files: birthday_calendar.zip
