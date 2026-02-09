@@ -1075,6 +1075,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "pytest-cov" },
     { name = "pytest-homeassistant-custom-component" },
 ]
 
@@ -1085,7 +1086,10 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
-dev = [{ name = "pytest-homeassistant-custom-component", specifier = ">=0.13.102" }]
+dev = [
+    { name = "pytest-cov", specifier = ">=6.0.0" },
+    { name = "pytest-homeassistant-custom-component", specifier = ">=0.13.102" },
+]
 
 [[package]]
 name = "habluetooth"

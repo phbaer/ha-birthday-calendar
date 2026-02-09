@@ -25,7 +25,11 @@ jobs:
             apt install -y gcc
             uv sync --frozen
       - name: Run tests
-        run: uv run pytest
+        run: |
+          echo "## Test Coverage Report" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          uv run pytest --cov --cov-report=term-missing | tee -a $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:

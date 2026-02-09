@@ -13,4 +13,16 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pytest-homeassistant-custom-component>=0.13.102",
+    "pytest-cov>=6.0.0",
+]
+
+[tool.coverage.run]
+source = ["custom_components/birthday_calendar"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
 ]
