@@ -1,0 +1,67 @@
+name: build-and-test
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  pull_request:
+
+jobs:
+  build:
+    runs-on: node
+    env:
+      DEPENDENCY_TRACK_SERVER_URL: ${{ secrets.DEPENDENCY_TRACK_SERVER_URL }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Install dependencies
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          command: |
+            apt update
+            apt install -y gcc
+            uv sync --frozen
+      - name: Run mypy
+        run: uv run mypy .
+      - name: Run bandit
+        run: uv run bandit -r .
+      - name: Run flake8
+        run: uv run flake8 .
+      - name: Run pylint
+        run: uv run pylint .
+      - name: Run tests
+        run: uv run pytest --cov --cov-report=xml
+      - name: Export SBOM
+        run: uv export --format cyclonedx1.5 --output-file bom.json
+      - name: Upload SBOM to Dependency Track
+        if: env.DEPENDENCY_TRACK_SERVER_URL != ''
+        uses: https://github.com/DependencyTrack/gh-upload-sbom@v3
+        with:
+          serverHostname: ${{ secrets.DEPENDENCY_TRACK_SERVER_URL }}
+          apiKey: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}
+          projectname: ha-carddav
+          projectversion: latest
+          bomfilename: bom.json
+          autocreate: true
+      - name: Upload SBOM Artifact
+        uses: forgejo/upload-artifact@v5
+        with:
+          name: sbom
+          path: bom.json
+      - name: Upload Artifact
+        uses: forgejo/upload-artifact@v5
+        with:
+          name: birthday_calendar
+          path: |
+            custom_components/birthday_calendar
+            !custom_components/birthday_calendar/**/__pycache__
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: https://github.com/softprops/action-gh-release@v2
+        with:
+          files: birthday_calendar.zip
