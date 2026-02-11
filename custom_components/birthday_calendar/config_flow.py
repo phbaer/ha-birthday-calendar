@@ -1,4 +1,5 @@
 """Config flow for Birthday Calendar integration."""
+
 from __future__ import annotations
 
 import logging
@@ -7,14 +8,21 @@ from typing import Any
 import voluptuous as vol
 
 from homeassistant import config_entries
+from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.core import HomeAssistant
-from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 
 import aiohttp
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import DOMAIN, CONF_URL, CONF_USERNAME, CONF_PASSWORD, CONF_CALENDAR_NAME, CONF_DAYS
+from .const import (
+    DOMAIN,
+    CONF_URL,
+    CONF_USERNAME,
+    CONF_PASSWORD,
+    CONF_CALENDAR_NAME,
+    CONF_DAYS,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -61,7 +69,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle the initial step."""
         errors: dict[str, str] = {}
         if user_input is not None:
