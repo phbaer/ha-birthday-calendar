@@ -42,12 +42,10 @@ async def async_setup_entry(
     )
 
 
-# pylint: disable=abstract-method, too-many-instance-attributes
+# pylint: disable=abstract-method, too-many-instance-attributes, too-many-arguments, too-many-positional-arguments
 class BirthdayCalendarEntity(CalendarEntity):
     """Retrieving birthday events from a CardDAV server."""
 
-    # pylint: disable=too-many-instance-attributes, too-many-arguments
-    # pylint: disable=too-many-positional-arguments
     def __init__(
         self,
         name: str,

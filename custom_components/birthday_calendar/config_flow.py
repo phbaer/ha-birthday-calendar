@@ -15,12 +15,12 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import (
-    CONF_CALENDAR_NAME,
-    CONF_DAYS,
-    CONF_PASSWORD,
+    DOMAIN,
     CONF_URL,
     CONF_USERNAME,
-    DOMAIN,
+    CONF_PASSWORD,
+    CONF_CALENDAR_NAME,
+    CONF_DAYS,
 )
 
 _LOGGER = logging.getLogger(__name__)
