@@ -25,7 +25,7 @@ def parse_multistatus(content: str) -> list[Any]:
             )
             vcard = vobject.readOne(vcard_str)
             vcards.append(vcard)
-        except Exception:  # pylint: disable=broad-except
+        except Exception:  # pylint: disable=broad-except  # nosec
             continue
 
     return vcards
