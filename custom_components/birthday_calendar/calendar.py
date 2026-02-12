@@ -17,7 +17,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.util import dt
 
 from .const import CONF_CALENDAR_NAME, CONF_DAYS, CONF_PASSWORD, CONF_URL, CONF_USERNAME
-from .utils import parse_multistatus
+from .utils import parse_bday, parse_multistatus
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -42,9 +42,12 @@ async def async_setup_entry(
     )
 
 
+# pylint: disable=abstract-method, too-many-instance-attributes
 class BirthdayCalendarEntity(CalendarEntity):
     """Retrieving birthday events from a CardDAV server."""
 
+    # pylint: disable=too-many-instance-attributes, too-many-arguments
+    # pylint: disable=too-many-positional-arguments
     def __init__(
         self,
         name: str,
@@ -123,7 +126,6 @@ class BirthdayCalendarEntity(CalendarEntity):
         self, vcard: Any, start_date: datetime.datetime, end_date: datetime.datetime
     ) -> CalendarEvent | None:
         """Parse a vCard and return a CalendarEvent if a birthday falls in the range."""
-        from .utils import parse_bday
 
         event_data = parse_bday(vcard, start_date, end_date)
 

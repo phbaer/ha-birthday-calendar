@@ -29,7 +29,7 @@ jobs:
       - name: Run mypy
         run: uv run mypy .
       - name: Run bandit
-        run: uv run bandit -r .
+        run: uv run bandit -c pyproject.toml -r .
       - name: Run flake8
         run: uv run flake8 .
       - name: Run pylint

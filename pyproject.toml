@@ -45,3 +45,26 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "if TYPE_CHECKING:",
 ]
+[tool.pylint.MAIN]
+ignore = [
+    ".venv",
+    ".git",
+    "tests",
+    "__pycache__",
+    "build",
+    "dist",
+]
+
+[tool.pylint.FORMAT]
+max-line-length = 88
+
+[tool.pylint."MESSAGES CONTROL"]
+disable = [
+    "C0114", # missing-module-docstring
+    "C0115", # missing-class-docstring
+    "C0116", # missing-function-docstring
+]
+
+[tool.bandit]
+exclude_dirs = ["tests", ".venv", "build", "dist"]
+

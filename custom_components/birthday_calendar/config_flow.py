@@ -5,23 +5,22 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+import aiohttp
 import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
-
-import aiohttp
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import (
-    DOMAIN,
-    CONF_URL,
-    CONF_USERNAME,
-    CONF_PASSWORD,
     CONF_CALENDAR_NAME,
     CONF_DAYS,
+    CONF_PASSWORD,
+    CONF_URL,
+    CONF_USERNAME,
+    DOMAIN,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -56,12 +55,13 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
             # 200 and 207 are successful CardDAV responses
             if response.status not in (200, 207):
                 raise CannotConnect
-    except aiohttp.ClientError:
-        raise CannotConnect
+    except aiohttp.ClientError as exc:
+        raise CannotConnect from exc
 
     return {"title": data[CONF_CALENDAR_NAME]}
 
 
+# pylint: disable=abstract-method
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Birthday Calendar."""
 
