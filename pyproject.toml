@@ -3,7 +3,7 @@ name = "ha-birthday-calendar"
 version = "0.1.0"
 description = "A component for Home Assistant that creates a calendar entity from a CardDAV addressbook, extracting birthdays from contact VCards."
 readme = "README.md"
-requires-python = ">=3.13.2"
+requires-python = ">=3.14.3"
 license = "MIT"
 dependencies = [
     "aiohttp>=3.13.3",
