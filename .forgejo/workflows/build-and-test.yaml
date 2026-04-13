@@ -62,6 +62,6 @@ jobs:
             !custom_components/birthday_calendar/**/__pycache__
       - name: Release
         if: startsWith(github.ref, 'refs/tags/')
-        uses: https://github.com/softprops/action-gh-release@v2
+        uses: https://github.com/softprops/action-gh-release@v3
         with:
           files: birthday_calendar.zip
