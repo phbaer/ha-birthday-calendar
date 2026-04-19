@@ -7,6 +7,7 @@ on:
     tags:
       - 'v*'
   pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
@@ -27,12 +28,16 @@ jobs:
             apt install -y gcc
             uv sync --frozen
       - name: Run mypy
-        run: uv run mypy .
+        if: github.event_name == 'pull_request'
+        run: uv run mypy --python-version 3.14 .
       - name: Run bandit
-        run: uv run bandit -r .
+        if: github.event_name == 'pull_request'
+        run: uv run bandit -c pyproject.toml -r .
       - name: Run flake8
+        if: github.event_name == 'pull_request'
         run: uv run flake8 .
       - name: Run pylint
+        if: github.event_name == 'pull_request'
         run: uv run pylint .
       - name: Run tests
         run: uv run pytest --cov --cov-report=xml

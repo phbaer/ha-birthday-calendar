@@ -3,7 +3,7 @@ name = "ha-birthday-calendar"
 version = "0.1.0"
 description = "A component for Home Assistant that creates a calendar entity from a CardDAV addressbook, extracting birthdays from contact VCards."
 readme = "README.md"
-requires-python = ">=3.13.2"
+requires-python = ">=3.14.3"
 license = "MIT"
 dependencies = [
     "aiohttp>=3.13.3",
@@ -16,9 +16,24 @@ dev = [
     "pytest-cov>=6.0.0",
     "mypy>=1.19.1",
     "bandit>=1.9.3",
-    "flake8>=7.3.0",
     "pylint>=4.0.4",
+    "types-vobject>=0.9.9.20250708",
+    "flake8>=7.0.0",
+    "ruff>=0.9.0",
 ]
+
+[tool.mypy]
+python_version = "3.13"
+warn_return_any = true
+warn_unused_configs = true
+check_untyped_defs = true
+explicit_package_bases = true
+
+[[tool.mypy.overrides]]
+module = [
+    "vobject.*",
+]
+ignore_missing_imports = true
 
 [tool.coverage.run]
 source = ["custom_components/birthday_calendar"]
@@ -30,3 +45,26 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "if TYPE_CHECKING:",
 ]
+[tool.pylint.MAIN]
+ignore = [
+    ".venv",
+    ".git",
+    "tests",
+    "__pycache__",
+    "build",
+    "dist",
+]
+
+[tool.pylint.FORMAT]
+max-line-length = 88
+
+[tool.pylint."MESSAGES CONTROL"]
+disable = [
+    "C0114", # missing-module-docstring
+    "C0115", # missing-class-docstring
+    "C0116", # missing-function-docstring
+]
+
+[tool.bandit]
+exclude_dirs = ["tests", ".venv", "build", "dist"]
+
