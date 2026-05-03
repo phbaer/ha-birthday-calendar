@@ -44,6 +44,31 @@ async def test_form(hass, aioclient_mock):
     }
 
 
+async def test_form_custom_days(hass, aioclient_mock):
+    """Test that custom days are preserved in config flow."""
+    aioclient_mock.request("PROPFIND", "http://test.local", status=200)
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+
+    result2 = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {
+            CONF_CALENDAR_NAME: "Test Calendar",
+            CONF_URL: "http://test.local",
+            CONF_USERNAME: "test-user",
+            CONF_PASSWORD: "test-password",
+            "days": 60,
+        },
+    )
+    await hass.async_block_till_done()
+
+    assert result2["type"] == FlowResultType.CREATE_ENTRY
+    assert result2["title"] == "Test Calendar"
+    assert result2["data"]["days"] == 60
+
+
 async def test_form_invalid_auth(hass, aioclient_mock):
     """Test invalid auth."""
     aioclient_mock.request("PROPFIND", "http://test.local", status=401)

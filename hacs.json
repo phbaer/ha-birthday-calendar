@@ -5,18 +5,18 @@
   "domains": [
     "calendar"
   ],
-  "iot_class": "local_polling",
+  "iot_class": "cloud_polling",
   "documentation": "https://github.com/phbaer/ha-birthday-calendar/blob/main/README.md",
   "issue_tracker": "https://github.com/phbaer/ha-birthday-calendar/issues",
   "codeowners": [
     "@phbaer"
   ],
   "requirements": [
-    "python-dateutil>=2.8.2"
+    "vobject>=0.9.9"
   ],
   "authors": [
     "Philipp A. Baer <git@ph.baer.one>"
   ],
   "zip_release": true,
-  "version": "1.0.0"
+  "version": "1.0.1"
 }

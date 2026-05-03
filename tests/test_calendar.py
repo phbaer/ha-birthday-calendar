@@ -4,6 +4,7 @@ from datetime import datetime, date, timedelta
 from unittest.mock import MagicMock, patch, AsyncMock
 
 from homeassistant.core import HomeAssistant
+from homeassistant.components.calendar import CalendarEvent
 from homeassistant.util import dt as dt_util
 
 from custom_components.birthday_calendar.calendar import BirthdayCalendarEntity
@@ -90,3 +91,50 @@ async def test_calendar_fetch_error(hass: HomeAssistant):
 
     events = await entity.async_get_events(hass, dt_util.now(), dt_util.now())
     assert len(events) == 0
+
+
+async def test_fetch_vcards_exception_returns_empty(hass: HomeAssistant):
+    """Test fetch vCards returns empty list on exception."""
+    mock_session = MagicMock()
+    mock_session.request.side_effect = Exception("connection failed")
+
+    entity = BirthdayCalendarEntity(
+        "Test Calendar", "http://test.local", "user", "pass", 30, mock_session
+    )
+    entity.hass = hass
+
+    vcards = await entity._fetch_vcards()
+    assert vcards == []
+
+
+async def test_async_update_sets_next_event(hass: HomeAssistant):
+    """Test async_update chooses the earliest event."""
+    mock_session = MagicMock()
+    entity = BirthdayCalendarEntity(
+        "Test Calendar", "http://test.local", "user", "pass", 30, mock_session
+    )
+    entity.hass = hass
+
+    events = [
+        CalendarEvent(
+            start=date(2024, 5, 10),
+            end=date(2024, 5, 11),
+            summary="Later",
+            description="",
+            location="",
+        ),
+        CalendarEvent(
+            start=date(2024, 4, 1),
+            end=date(2024, 4, 2),
+            summary="Next",
+            description="",
+            location="",
+        ),
+    ]
+
+    with patch.object(BirthdayCalendarEntity, "async_get_events", AsyncMock(return_value=events)):
+        await entity.async_update()
+
+    assert entity.event is not None
+    assert entity.event.summary == "Next"
+    assert entity.event.start == date(2024, 4, 1)

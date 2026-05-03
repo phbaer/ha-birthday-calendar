@@ -10,7 +10,7 @@
     "iot_class": "cloud_polling",
     "issue_tracker": "https://git.baer.one/phbaer/ha-birthday-calendar/issues",
     "requirements": [
-        "vobject==0.9.6.1"
+        "vobject>=0.9.9"
     ],
-    "version": "1.0.0"
+    "version": "1.0.1"
 }
