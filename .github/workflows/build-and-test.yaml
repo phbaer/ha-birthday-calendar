@@ -16,7 +16,7 @@ jobs:
     env:
       DEPENDENCY_TRACK_SERVER_URL: ${{ secrets.DEPENDENCY_TRACK_SERVER_URL }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install uv
         uses: astral-sh/setup-uv@v7
       - name: Install dependencies
