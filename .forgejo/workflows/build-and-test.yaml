@@ -45,7 +45,7 @@ jobs:
         run: uv export --format cyclonedx1.5 --output-file bom.json
       - name: Upload SBOM to Dependency Track
         if: env.DEPENDENCY_TRACK_SERVER_URL != ''
-        uses: https://github.com/DependencyTrack/gh-upload-sbom@v3
+        uses: https://github.com/DependencyTrack/gh-upload-sbom@v4
         with:
           serverHostname: ${{ secrets.DEPENDENCY_TRACK_SERVER_URL }}
           apiKey: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}
