@@ -7,6 +7,7 @@ on:
     tags:
       - 'v*'
   pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
@@ -14,9 +15,9 @@ jobs:
     env:
       DEPENDENCY_TRACK_SERVER_URL: ${{ secrets.DEPENDENCY_TRACK_SERVER_URL }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v9.0.0
       - name: Install dependencies
         uses: nick-fields/retry@v3
         with:
@@ -27,12 +28,16 @@ jobs:
             apt install -y gcc
             uv sync --frozen
       - name: Run mypy
-        run: uv run mypy .
+        if: github.event_name == 'pull_request'
+        run: uv run mypy --python-version 3.14 .
       - name: Run bandit
-        run: uv run bandit -r .
+        if: github.event_name == 'pull_request'
+        run: uv run bandit -c pyproject.toml -r .
       - name: Run flake8
+        if: github.event_name == 'pull_request'
         run: uv run flake8 .
       - name: Run pylint
+        if: github.event_name == 'pull_request'
         run: uv run pylint .
       - name: Run tests
         run: uv run pytest --cov --cov-report=xml
@@ -40,7 +45,7 @@ jobs:
         run: uv export --format cyclonedx1.5 --output-file bom.json
       - name: Upload SBOM to Dependency Track
         if: env.DEPENDENCY_TRACK_SERVER_URL != ''
-        uses: https://github.com/DependencyTrack/gh-upload-sbom@v3
+        uses: https://github.com/DependencyTrack/gh-upload-sbom@v4
         with:
           serverHostname: ${{ secrets.DEPENDENCY_TRACK_SERVER_URL }}
           apiKey: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}

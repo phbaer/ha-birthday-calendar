@@ -1,10 +1,17 @@
 """Test the Birthday Calendar utility logic."""
-import sys
+
 import os
-sys.path.append(os.getcwd())
-from datetime import datetime, date, timedelta, timezone
-from custom_components.birthday_calendar.utils import parse_multistatus, parse_bday
-import vobject
+import sys
+
+sys.path.append(os.getcwd())  # noqa: E402
+
+from datetime import date, datetime, timedelta, timezone  # noqa: E402
+import vobject  # noqa: E402
+
+from custom_components.birthday_calendar.utils import (  # noqa: E402
+    parse_bday,
+    parse_multistatus,
+)
 
 VCARD_DATA = """
 BEGIN:VCARD
@@ -20,6 +27,7 @@ N:Doe;Jane;;;
 BDAY:1985-02-28
 END:VCARD
 """
+
 
 def test_parse_multistatus():
     """Test parsing of PROPFIND response."""
@@ -42,6 +50,7 @@ def test_parse_multistatus():
     assert vcards[0].fn.value == "John Doe"
     assert vcards[1].fn.value == "Jane Doe"
 
+
 def test_parse_bday():
     """Test parsing of birthdays."""
     vcard_john = vobject.readOne("""
@@ -51,15 +60,16 @@ FN:John Doe
 BDAY:1990-05-10
 END:VCARD
 """)
-    
+
     now = datetime(2023, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
     start_date = now
     end_date = now + timedelta(days=365)
-    
+
     event = parse_bday(vcard_john, start_date, end_date)
     assert event is not None
     assert event["summary"] == "John Doe's Birthday (33)"
     assert event["start"] == date(2023, 5, 10)
+
 
 def test_parse_bday_no_year():
     """Test parsing of birthdays with no year (if vobject parses them)."""
@@ -74,15 +84,15 @@ END:VCARD
 """)
     # If vobject fails to parse --05-10 to a date/struct, it might be a string.
     # Our code handles string fallback.
-    
+
     now = datetime(2023, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
     start_date = now
     end_date = now + timedelta(days=365)
-    
-    # This might return None if vobject/our logic doesn't support the specific format 
+
+    # This might return None if vobject/our logic doesn't support the specific format
     # but let's see if it works or not.
     event = parse_bday(vcard_noyear, start_date, end_date)
-    
+
     if event:
         assert event["summary"] == "No Year's Birthday"
         assert event["start"] == date(2023, 5, 10)

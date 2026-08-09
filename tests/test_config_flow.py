@@ -1,8 +1,15 @@
 """Test the Birthday Calendar config flow."""
+
 from homeassistant import config_entries
 from homeassistant.data_entry_flow import FlowResultType
 
-from custom_components.birthday_calendar.const import DOMAIN, CONF_URL, CONF_USERNAME, CONF_PASSWORD, CONF_CALENDAR_NAME
+from custom_components.birthday_calendar.const import (
+    CONF_CALENDAR_NAME,
+    CONF_PASSWORD,
+    CONF_URL,
+    CONF_USERNAME,
+    DOMAIN,
+)
 
 
 async def test_form(hass, aioclient_mock):
@@ -44,7 +51,7 @@ async def test_form_invalid_auth(hass, aioclient_mock):
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
-    
+
     result2 = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         {
@@ -67,7 +74,7 @@ async def test_form_cannot_connect(hass, aioclient_mock):
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
-    
+
     result2 = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         {
