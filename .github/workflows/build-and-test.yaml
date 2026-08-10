@@ -13,6 +13,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     if: github.server_url == 'https://github.com'
+    permissions:
+      contents: write
     env:
       DEPENDENCY_TRACK_SERVER_URL: ${{ secrets.DEPENDENCY_TRACK_SERVER_URL }}
     steps:
@@ -45,6 +47,10 @@ jobs:
         run: uv run pylint .
       - name: Run tests
         run: uv run pytest --cov --cov-report=xml
+      - name: Validate with HACS
+        uses: hacs/action@main
+        with:
+          category: integration
       - name: Export SBOM
         run: uv export --format cyclonedx1.5 --output-file bom.json
       - name: Upload SBOM to Dependency Track
