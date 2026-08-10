@@ -17,6 +17,9 @@ jobs:
       DEPENDENCY_TRACK_SERVER_URL: ${{ secrets.DEPENDENCY_TRACK_SERVER_URL }}
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
       - name: Install uv
         uses: astral-sh/setup-uv@v9.0.0
       - name: Install dependencies
@@ -59,13 +62,13 @@ jobs:
         with:
           name: sbom
           path: bom.json
+      - name: Create release archive
+        run: zip -r birthday_calendar.zip custom_components/birthday_calendar -x '*/__pycache__/*'
       - name: Upload Artifact
         uses: actions/upload-artifact@v6
         with:
           name: birthday_calendar
-          path: |
-            custom_components/birthday_calendar
-            !custom_components/birthday_calendar/**/__pycache__
+          path: birthday_calendar.zip
       - name: Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v3

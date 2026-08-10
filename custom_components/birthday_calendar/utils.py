@@ -5,6 +5,9 @@ from datetime import timedelta
 import logging
 import re
 from typing import Any
+
+from defusedxml import ElementTree
+
 import vobject
 
 _LOGGER = logging.getLogger(__name__)
@@ -12,25 +15,42 @@ _LOGGER = logging.getLogger(__name__)
 
 def parse_multistatus(content: str) -> list[Any]:
     """Parse the PROPFIND response to extract vCards."""
-    vcards = []
-    # Simple regex based extraction to avoid XML deps if possible
-    matches = re.findall(r"(BEGIN:VCARD.*?END:VCARD)", content, re.DOTALL)
+    try:
+        root = ElementTree.fromstring(content)
+    except ElementTree.ParseError:
+        _LOGGER.warning("CardDAV server returned an invalid multistatus response")
+        # Some CardDAV proxies return the address-data body directly rather
+        # than wrapping it in a DAV multistatus response.
+        address_data: list[str] = [content]
+    else:
+        address_data = []
+        for element in root.iter():
+            if (
+                element.tag.rsplit("}", maxsplit=1)[-1] == "address-data"
+                and element.text
+            ):
+                address_data.append(element.text)
 
-    for vcard_str in matches:
-        try:
-            vcard_str = (
-                vcard_str.replace("&lt;", "<")
-                .replace("&gt;", ">")
-                .replace("&amp;", "&")
-            )
-            vcard = vobject.readOne(vcard_str)
-            vcards.append(vcard)
-        except Exception:  # pylint: disable=broad-except  # nosec
-            continue
+    vcards: list[Any] = []
+    for vcard_str in address_data:
+        # CardDAV may return more than one vCard in a single address-data
+        # element.  ``readOne`` only accepts one component, so split the
+        # payload into complete VCARD blocks before parsing it.
+        card_blocks = re.findall(
+            r"BEGIN:VCARD\s.*?END:VCARD", vcard_str, flags=re.IGNORECASE | re.DOTALL
+        )
+        for card_block in card_blocks:
+            try:
+                vcards.append(vobject.readOne(card_block))
+            except Exception:  # noqa: BLE001  # pylint: disable=broad-exception-caught
+                _LOGGER.debug("Skipping invalid vCard returned by CardDAV server")
 
     return vcards
 
 
+# vObject accepts several date representations and can raise parser-specific
+# exceptions, so this function deliberately keeps the defensive fallback.
+# pylint: disable=too-many-locals,too-many-branches
 def parse_bday(
     vcard: Any,
     start_date: datetime.datetime,
@@ -49,11 +69,25 @@ def parse_bday(
     try:
         bday_val = vcard.bday.value
 
-        if isinstance(bday_val, str):
+        has_birth_year = True
+        if isinstance(bday_val, datetime.datetime):
+            bday_val = bday_val.date()
+        elif isinstance(bday_val, datetime.date):
+            # vobject normally returns a date for a full-year BDAY.
+            pass
+        elif isinstance(bday_val, str):
             try:
                 bday_val = datetime.date.fromisoformat(bday_val)
             except ValueError:
-                return None
+                try:
+                    month, day = map(int, bday_val.removeprefix("--").split("-"))
+                    bday_val = datetime.date(2000, month, day)
+                    has_birth_year = False
+                except (TypeError, ValueError):
+                    return None
+
+        if not isinstance(bday_val, datetime.date):
+            return None
 
         current_year = start_date.year
 
@@ -100,7 +134,7 @@ def parse_bday(
 
         summary = f"{fn}'s Birthday"
 
-        age = found_date.year - bday_val.year
+        age = found_date.year - bday_val.year if has_birth_year else 0
         if age > 0 and bday_val.year > 1900:
             summary += f" ({age})"
 

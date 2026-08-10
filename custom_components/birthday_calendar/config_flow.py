@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from hashlib import sha256
 from typing import Any
 
 import aiohttp
@@ -36,6 +37,12 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 )
 
 
+def _entry_unique_id(data: dict[str, Any]) -> str:
+    """Return a stable, non-sensitive identifier for an address book."""
+    identifier = f"{data[CONF_URL].rstrip('/')}\0{data[CONF_USERNAME]}"
+    return sha256(identifier.encode()).hexdigest()
+
+
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
     """Validate the user input allows us to connect.
 
@@ -47,8 +54,12 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
         async with session.request(
             "PROPFIND",
             data[CONF_URL],
-            auth=aiohttp.BasicAuth(data[CONF_USERNAME], data[CONF_PASSWORD]),
-            headers={"Depth": "0"},
+            headers={
+                "Depth": "0",
+                "Authorization": aiohttp.encode_basic_auth(
+                    data[CONF_USERNAME], data[CONF_PASSWORD]
+                ),
+            },
         ) as response:
             if response.status == 401:
                 raise InvalidAuth
@@ -73,6 +84,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         errors: dict[str, str] = {}
         if user_input is not None:
+            await self.async_set_unique_id(_entry_unique_id(user_input))
+            self._abort_if_unique_id_configured()
             try:
                 info = await validate_input(self.hass, user_input)
             except CannotConnect:

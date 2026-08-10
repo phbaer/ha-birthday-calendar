@@ -44,6 +44,31 @@ async def test_form(hass, aioclient_mock):
     }
 
 
+async def test_form_custom_days(hass, aioclient_mock):
+    """Test that custom days are preserved in config flow."""
+    aioclient_mock.request("PROPFIND", "http://test.local", status=200)
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+
+    result2 = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {
+            CONF_CALENDAR_NAME: "Test Calendar",
+            CONF_URL: "http://test.local",
+            CONF_USERNAME: "test-user",
+            CONF_PASSWORD: "test-password",
+            "days": 60,
+        },
+    )
+    await hass.async_block_till_done()
+
+    assert result2["type"] == FlowResultType.CREATE_ENTRY
+    assert result2["title"] == "Test Calendar"
+    assert result2["data"]["days"] == 60
+
+
 async def test_form_invalid_auth(hass, aioclient_mock):
     """Test invalid auth."""
     aioclient_mock.request("PROPFIND", "http://test.local", status=401)
@@ -88,3 +113,29 @@ async def test_form_cannot_connect(hass, aioclient_mock):
 
     assert result2["type"] == FlowResultType.FORM
     assert result2["errors"] == {"base": "cannot_connect"}
+
+
+async def test_form_aborts_when_address_book_is_already_configured(
+    hass, aioclient_mock
+):
+    """Test the same CardDAV address book cannot be configured twice."""
+    aioclient_mock.request("PROPFIND", "http://test.local", status=200)
+    data = {
+        CONF_CALENDAR_NAME: "Test Calendar",
+        CONF_URL: "http://test.local",
+        CONF_USERNAME: "test-user",
+        CONF_PASSWORD: "test-password",
+    }
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], data)
+    assert result["type"] == FlowResultType.CREATE_ENTRY
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], data)
+    assert result["type"] == FlowResultType.ABORT
+    assert result["reason"] == "already_configured"

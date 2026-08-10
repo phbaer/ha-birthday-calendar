@@ -42,12 +42,12 @@ A Home Assistant integration that creates a calendar entity from a CardDAV addre
 
 ## Development
 
-This project uses `uv` for dependency management and requires a recent version of Python (3.13.2+).
+This project uses `uv` for dependency management and requires a recent version of Python (3.14.3+).
 
 ### Prerequisites
 
 *   `uv`
-*   Python 3.13.2 or later
+*   Python 3.14.3 or later
 *   C Compiler (`build-essential`, `gcc`, or `clang`) - **Required** for compiling dependencies on Python 3.14.
 
 ### Setup

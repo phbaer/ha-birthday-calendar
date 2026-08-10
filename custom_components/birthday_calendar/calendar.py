@@ -5,7 +5,6 @@ from __future__ import annotations
 import datetime
 import logging
 from datetime import timedelta
-
 from typing import Any
 
 import aiohttp
@@ -37,18 +36,21 @@ async def async_setup_entry(
     session = async_get_clientsession(hass)
 
     async_add_entities(
-        [BirthdayCalendarEntity(name, url, username, password, days, session)],
+        [
+            BirthdayCalendarEntity(
+                name, url, username, password, days, session, config_entry.entry_id
+            )
+        ],
         True,
     )
 
 
-# pylint: disable=abstract-method, too-many-instance-attributes
+# The entity is read-only; CalendarEntity's mutation methods are intentionally
+# unsupported. Its constructor also needs all CardDAV connection settings.
+# pylint: disable=abstract-method,too-many-instance-attributes
 class BirthdayCalendarEntity(CalendarEntity):
     """Retrieving birthday events from a CardDAV server."""
-
-    # pylint: disable=too-many-instance-attributes, too-many-arguments
-    # pylint: disable=too-many-positional-arguments
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         name: str,
         url: str,
@@ -56,6 +58,7 @@ class BirthdayCalendarEntity(CalendarEntity):
         password: str,
         days: int,
         session: aiohttp.ClientSession,
+        entry_id: str | None = None,
     ) -> None:
         """Create the Birthday Calendar Entity."""
         super().__init__()
@@ -67,6 +70,7 @@ class BirthdayCalendarEntity(CalendarEntity):
         self._session = session
         self._event: CalendarEvent | None = None
         self._attr_name = name
+        self._attr_unique_id = entry_id
 
     @property
     def event(self):
@@ -85,14 +89,14 @@ class BirthdayCalendarEntity(CalendarEntity):
         # and not always supported.
 
         vcards = await self._fetch_vcards()
-        events = []
+        events: list[CalendarEvent] = []
 
         for vcard in vcards:
             bday_event = self._parse_bday(vcard, start_date, end_date)
             if bday_event:
                 events.append(bday_event)
 
-        return events
+        return sorted(events, key=lambda event: event.start)
 
     async def _fetch_vcards(self) -> list[str]:
         """Fetch all vCards from the CardDAV server."""
@@ -106,11 +110,18 @@ class BirthdayCalendarEntity(CalendarEntity):
         </d:propfind>
         """
 
-        auth = aiohttp.BasicAuth(self._username, self._password)
-
         try:
             async with self._session.request(
-                "PROPFIND", self._url, data=data, headers=headers, auth=auth
+                "PROPFIND",
+                self._url,
+                data=data,
+                headers={
+                    **headers,
+                    "Authorization": aiohttp.encode_basic_auth(
+                        self._username, self._password
+                    ),
+                },
+                timeout=aiohttp.ClientTimeout(total=30),
             ) as response:
                 if response.status not in (200, 207):
                     _LOGGER.error("Failed to fetch CardDAV data: %s", response.status)
@@ -118,7 +129,7 @@ class BirthdayCalendarEntity(CalendarEntity):
 
                 return parse_multistatus(await response.text())
 
-        except Exception:  # pylint: disable=broad-except
+        except (aiohttp.ClientError, TimeoutError):
             _LOGGER.exception("Error connecting to CardDAV server")
             return []
 
