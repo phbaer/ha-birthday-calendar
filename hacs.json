@@ -2,21 +2,6 @@
   "name": "Birthday Calendar",
   "render_readme": true,
   "homeassistant": "2026.7.0",
-  "domains": [
-    "calendar"
-  ],
-  "iot_class": "cloud_polling",
-  "documentation": "https://github.com/phbaer/ha-birthday-calendar/blob/main/README.md",
-  "issue_tracker": "https://github.com/phbaer/ha-birthday-calendar/issues",
-  "codeowners": [
-    "@phbaer"
-  ],
-  "requirements": [
-    "vobject>=0.9.9"
-  ],
-  "authors": [
-    "Philipp A. Baer <git@ph.baer.one>"
-  ],
   "zip_release": true,
-  "version": "1.1.0"
+  "filename": "birthday_calendar.zip"
 }

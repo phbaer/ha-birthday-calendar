@@ -25,7 +25,7 @@ jobs:
           max_attempts: 3
           command: |
             apt update
-            apt install -y gcc
+            apt install -y gcc zip
             uv sync --frozen
       - name: Run mypy
         if: github.event_name == 'pull_request'
@@ -65,8 +65,11 @@ jobs:
           path: |
             custom_components/birthday_calendar
             !custom_components/birthday_calendar/**/__pycache__
+      - name: Create release archive
+        run: zip -r birthday_calendar.zip custom_components/birthday_calendar -x '*/__pycache__/*'
       - name: Release
         if: startsWith(github.ref, 'refs/tags/')
-        uses: https://github.com/softprops/action-gh-release@v3
+        uses: https://git.moyskleytech.com/boiscljo/forgejo-release-action@main
         with:
-          files: birthday_calendar.zip
+          tag: ${{ github.ref_name }}
+          assets: birthday_calendar.zip:birthday_calendar.zip
