@@ -65,14 +65,14 @@ jobs:
           bomfilename: bom.json
           autocreate: true
       - name: Upload SBOM Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: sbom
           path: bom.json
       - name: Create release archive
         run: zip -r birthday_calendar.zip custom_components/birthday_calendar -x '*/__pycache__/*'
       - name: Upload Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: birthday_calendar
           path: birthday_calendar.zip
